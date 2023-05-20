@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2017                    */
-/* Created on:     5/19/2023 9:33:01 PM                         */
+/* Created on:     5/20/2023 2:20:01 PM                         */
 /*==============================================================*/
 
 
@@ -245,17 +245,18 @@ go
 /*==============================================================*/
 create table PERSON (
    ID                   int                  not null,
-   EMAIL                varchar(50)          null,
    FNAME                varchar(20)          null,
    LNAME                varchar(20)          null,
+   EMAIL                varchar(50)          null,
+   PERSON_PASSWORD      varchar(20)          null,
    PHONENUM             varchar(20)          null,
+   DOB                  datetime             null,
    AGE                  int                  null,
    CITY                 varchar(20)          null,
    PERSON_STATE         varchar(20)          null,
-   ZIPCODE              int                  null,
    STREET               varchar(20)          null,
+   ZIPCODE              int                  null,
    PERSON_ROLE          varchar(15)          null,
-   DOB                  datetime             null,
    constraint PK_PERSON primary key (ID)
 )
 go
