@@ -342,3 +342,6 @@ alter table TICKET
       references FLIGHT (FLIGHT_NUM)
 go
 
+alter table TICKET
+   add PRICE float 
+go

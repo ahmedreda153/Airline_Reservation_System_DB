@@ -6,20 +6,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter as tk
 from tkinter import ttk
-import decimal
-import sqlite3
-# import mysql.connector
 from tkinter import messagebox
 #sba7 el noor
-
-home_page = tk.Tk()
-# home_page.geometry("500x500")
-screen_width = home_page.winfo_screenwidth()
-screen_height = home_page.winfo_screenheight()
-x = int((screen_width / 2) - (500 / 2))
-y = int((screen_height / 2) - (600 / 2))
-home_page.geometry(f"500x500+{x}+{y}")
-home_page.title("Airline Reservation System")
 
 #connect database
 server = 'DESKTOP-Q66QLBQ\SQLEXPRESS'
@@ -30,6 +18,14 @@ cursor = conn.cursor()
 
 
 def home():
+    global home_page, screen_width, screen_height, x, y
+    home_page = tk.Tk()
+    screen_width = home_page.winfo_screenwidth()
+    screen_height = home_page.winfo_screenheight()
+    x = int((screen_width / 2) - (500 / 2))
+    y = int((screen_height / 2) - (600 / 2))
+    home_page.geometry(f"500x500+{x}+{y}")
+    home_page.title("Airline Reservation System")
     # Create label
     page_title = Label(home_page, text = "Airline Reservation System")
     page_title.config(font =("Courier", 14))
@@ -223,6 +219,7 @@ def customer_page():
     customer_page = tk.Tk()
     customer_page.geometry(f"500x500+{x}+{y}")
     customer_page.title("Customer Page")
+
     book_button = tk.Button(customer_page, text="Book", width=20, height=2, command=book_flight)
     book_button.pack()
     book_button.place(x=10, y=10)
@@ -266,6 +263,10 @@ def change_class_submit():
     print("")    
 
 def update_info():
+    if customer_page:
+        customer_page.destroy()
+    else:
+        admin_page.destroy()
     global update_info_page
     update_info_page = tk.Tk()
     update_info_page.geometry(f"500x500+{x}+{y}")
@@ -274,103 +275,64 @@ def update_info():
     personPass_label = tk.Label(update_info_page, text="Enter the new Password: ")
     personPass_label.place(x=10, y=10)
     personPass_entry = tk.Entry(update_info_page)
-    personPass_entry.place(x=150, y=10)
+    personPass_entry.place(x=180, y=10)
 
     phoneNum_label = tk.Label(update_info_page, text="Enter the new phone Number: ")
     phoneNum_label.place(x=10, y=40)
     phoneNum_entry = tk.Entry(update_info_page)
-    phoneNum_entry.place(x=150, y=40)
+    phoneNum_entry.place(x=180, y=40)
+
+    personState_label = tk.Label(update_info_page, text="Enter the State: ")
+    personState_label.place(x=10, y=70)
+    personState_entry = tk.Entry(update_info_page)
+    personState_entry.place(x=180, y=70)
 
     cityUpdate_label = tk.Label(update_info_page, text="Enter the City: ")
-    cityUpdate_label.place(x=10, y=70)
+    cityUpdate_label.place(x=10, y=100)
     cityUpdate_entry = tk.Entry(update_info_page)
-    cityUpdate_entry.place(x=150, y=70)
+    cityUpdate_entry.place(x=180, y=100)
     
-    personState_label = tk.Label(update_info_page, text="Enter the State: ")
-    personState_label.place(x=10, y=100)
-    personState_entry = tk.Entry(update_info_page)
-    personState_entry.place(x=150, y=100)
-
     streetUpdate_label = tk.Label(update_info_page, text="Enter the Street: ")
     streetUpdate_label.place(x=10, y=130)
     streetUpdate_entry = tk.Entry(update_info_page)
-    streetUpdate_entry.place(x=150, y=130)
+    streetUpdate_entry.place(x=180, y=130)
 
-    zipCode_label = tk.Label(update_info_page, text="Enter the Street: ")
-    zipCode_label.place(x=10, y=170)
+    zipCode_label = tk.Label(update_info_page, text="Enter the zip code: ")
+    zipCode_label.place(x=10, y=160)
     zipCode_entry = tk.Entry(update_info_page)
-    zipCode_entry.place(x=150, y=170)
+    zipCode_entry.place(x=180, y=160)
 
     update_button = tk.Button(update_info_page, text="Update", command=update_data_submit)
-    update_button.pack()
+    update_button.place(x=215, y=210)
 
 def update_data_submit():
-    personPass = personPass_entry.get()
-    phoneNum = phoneNum_entry.get()
-    city = cityUpdate_entry.get()
-    personState = personState_entry.get()
-    street = streetUpdate_entry.get()
-    zipCode = zipCode_entry.get()
-    update_fields = {}
-    if personPass:
-        update_fields["PERSON_PASSWORD"] = personPass
-    else:
-        select_query = f"SELECT PERSON_PASSWORD FROM PERSON WHERE EMAIL = {email}"
-        cursor.execute(select_query)
-        row = cursor.fetchone()
-        update_fields["PERSON_PASSWORD"] = row[0]
-    
-    if phoneNum:
-        update_fields["PHONENUM"] = phoneNum
-    else:
-        select_query = f"SELECT PHONENUM FROM PERSON WHERE EMAIL = {email}"
-        cursor.execute(select_query)
-        row = cursor.fetchone()
-        update_fields["PHONENUM"] = row[0]
-    if city:
-        update_fields["CITY"] = city
-    else:
-        select_query = f"SELECT CITY FROM PERSON WHERE EMAIL = {email}"
-        cursor.execute(select_query)
-        row = cursor.fetchone()
-        update_fields["CITY"] = row[0]
-    if personState:
-        update_fields["PERSON_STATE"] = personState
-    else:
-        select_query = f"SELECT PERSON_STATE FROM PERSON WHERE EMAIL = {email}"
-        cursor.execute(select_query)
-        row = cursor.fetchone()
-        update_fields["PERSON_STATE"] = row[0]
-    if street:
-        update_fields["STREET"] = street
-    else:
-        select_query = f"SELECT STREET FROM PERSON WHERE EMAIL = {email}"
-        cursor.execute(select_query)
-        row = cursor.fetchone()
-        update_fields["STREET"] = row[0]
-    if zipCode:
-        update_fields["ZIPCODE"] = zipCode
-    else:
-        select_query = f"SELECT ZIPCODE FROM PERSON WHERE EMAIL = {email}"
-        cursor.execute(select_query)
-        row = cursor.fetchone()
-        update_fields["ZIPCODE"] = row[0]
-    
-    # if "PERSON_STATE" in update_fields:
-    #     if not city or not street or not zipCode:
-    #         messagebox.showerror("Error", "Changing the PERSON_STATE requires providing the street and zip code.")
-    #         return
-        
-    # if "CITY" in update_fields:
-    #     if not street or not zipCode:
-    #         messagebox.showerror("Error", "Changing the city requires providing the street and zip code.")
-    #         return
-
-    print(update_fields)
-    # update query
-    update_query = f"UPDATE PERSON SET PERSON_PASSWORD = '{update_fields['PERSON_PASSWORD']}', PHONENUM = '{update_fields['PHONENUM']}', CITY = '{update_fields['CITY']}', PERSON_STATE = '{update_fields['PERSON_STATE']}', STREET = '{update_fields['STREET']}', ZIPCODE = '{update_fields['ZIPCODE']}' WHERE EMAIL = {email}"
-    cursor.execute(update_query)
-    conn.commit()
+    if personPass_entry.get():
+        cursor.execute(f"UPDATE PERSON SET PERSON_PASSWORD = '{personPass_entry.get()}' WHERE EMAIL = '{email}'")
+        conn.commit()
+    if phoneNum_entry.get():
+        cursor.execute(f"UPDATE PERSON SET PHONENUM = '{phoneNum_entry.get()}' WHERE EMAIL = '{email}'")
+        conn.commit()
+    if personState_entry.get():
+        if not cityUpdate_entry.get() or not streetUpdate_entry.get() or not zipCode_entry.get():
+            messagebox.showerror("Error", "Please fill all the required fields (City, Street, Zip Code).")
+        else:
+            cursor.execute(f"UPDATE PERSON SET STATE = '{personState_entry.get()}' WHERE EMAIL = '{email}'")
+            conn.commit()
+    if cityUpdate_entry.get():
+        if not streetUpdate_entry.get() or not zipCode_entry.get():
+            messagebox.showerror("Error", "Please fill all the required fields (Street, Zip Code).")
+        else:
+            cursor.execute(f"UPDATE PERSON SET CITY = '{cityUpdate_entry.get()}' WHERE EMAIL = '{email}'")
+            conn.commit()
+    if streetUpdate_entry.get():
+        if not zipCode_entry.get():
+            messagebox.showerror("Error", "Please fill all the required fields (Zip Code).")
+        else:
+            cursor.execute(f"UPDATE PERSON SET STREET = '{streetUpdate_entry.get()}' WHERE EMAIL = '{email}'")
+            conn.commit()
+    if zipCode_entry.get():
+        cursor.execute(f"UPDATE PERSON SET ZIPCODE = '{zipCode_entry.get()}' WHERE EMAIL = '{email}'")
+        conn.commit()
 
 def book_flight():
     customer_page.destroy()
@@ -650,14 +612,15 @@ def List_flight(page, source = "default", destination = "default"):
         select_query = f"SELECT FLIGHT_NUM, SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, DURATION, AIRLINE FROM FLIGHT WHERE SOURCE_LOCATION='{source}' AND DESTINATION_LOCATION='{destination}'"
     
     cursor.execute(select_query)
-    rows = cursor.fetchall()
+    rows = cursor.fetchall() 
+    # toz fikk
     for row in rows:
         values = [str(value) for value in row]
         tree.insert("", tk.END, values=values)
 
     for col in tree["columns"]:
         tree.column(col, anchor=tk.CENTER)
-    tree.place(x=0, y=70)
+    tree.place(x=7, y=70)
 
 def update_flight():
     admin_page.destroy()
@@ -681,7 +644,7 @@ def update_flight():
     flightDEPARTURETime_entry_label = tk.Label(update_flight_page, text="Enter the New DEPARTURE Time: ")
     flightDEPARTURETime_entry_label.place(x=300, y=40)
     flightDEPARTURETime_entry= tk.Entry(update_flight_page)
-    flightDEPARTURETime_entry.place(x=450, y=40)
+    flightDEPARTURETime_entry.place(x=480, y=40)
 
     submit_button = tk.Button(update_flight_page, text="Submit", width=10, height=2, command=update_flight_submit)
     submit_button.place(x=400, y=400)
@@ -691,13 +654,15 @@ def update_flight_submit():
     cursor.execute(update_query)
     conn.commit()
     done = Label(update_flight_page, text = "Flight updated successfully")
-    done.place(x=350, y=350)
+    done.place(x=360, y=350)
 
 def delete_flight():
     admin_page.destroy()
     global delete_flight_page
     delete_flight_page = tk.Tk()
-    delete_flight_page.geometry(f"500x500+{x}+{y}")
+    x = int(screen_width/2 - 800/2)
+    y = int(screen_height/2 - 600/2)
+    delete_flight_page.geometry(f"900x500+{x}+{y}")
     List_flight(delete_flight_page)
     global flight_deleted_id_entry
     flight_deleted_id_label = tk.Label(delete_flight_page, text="Enter the Flight id: ")
