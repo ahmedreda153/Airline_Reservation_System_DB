@@ -17,19 +17,18 @@ def pick_date(event):
     date_window.title("Pick Date")
     cal = Calendar(date_window, selectmode="day", date_pattern="yyyy-mm-dd")
     cal.pack(pady=20)
-    submit = tk.Button(date_window, text="Submit", command=grab_date)
+    submit = tk.Button(date_window, text="Submit", command=lambda: grab_date(event.widget))
     submit.pack(pady=20)
     
-def grab_date():
-    DOB_entry.delete(0, END)
-    DOB_entry.insert(0, cal.get_date())
+def grab_date(test):
+    test.delete(0, END)
+    test.insert(0, cal.get_date())
     date_window.destroy()
 
 def sign_up():
     global Fname_entry, Lname_entry, email_entry, password_entry, DOB_entry, city_entry, state_entry, zipcode_entry, street_entry, phone_entry, selected_role
     home_window.home_page.destroy()
     sign_up_page = tk.Tk()
-    # sign_up_page.geometry("500x500")
     sign_up_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
     sign_up_page.title("Sign Up")
     selected_role = tk.IntVar(value=1)
@@ -51,7 +50,7 @@ def sign_up():
     #input password
     password_label = tk.Label(sign_up_page, text="Password")
     password_label.place(x=10, y=100)
-    password_entry = tk.Entry(sign_up_page)
+    password_entry = tk.Entry(sign_up_page, show="*")
     password_entry.place(x=100, y=100)
     #input date of birth
     DOB_label = tk.Label(sign_up_page, text="Date of Birth")

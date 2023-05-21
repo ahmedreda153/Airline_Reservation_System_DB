@@ -1,12 +1,12 @@
 from tkinter import *
 from tkcalendar import *
 import tkinter as tk
-from tkinter import ttk
-import tkinter as tk
+import datetime
 from tkinter import ttk
 import DataBase_connection
 import home_window
 import admin_window
+import signup_window
 
 def add_aircraft():
     admin_window.admin_page.destroy()
@@ -49,7 +49,7 @@ def add_aircraft_submit():
     done.after(2000, lambda: done.destroy())
     done.place(x=215, y=175)
     
-def List_aircraft(page):
+def List_aircraft(page, x_axis = 0, y_axis = 0):
     tree = ttk.Treeview(page)
     tree["columns"]=("SERIAL_NUM","AIRCRAFT_TYPE","MODEL", "CAPACITY", "MANUFACTURER")
     tree.column("#0", width=0, stretch=tk.NO)
@@ -74,7 +74,7 @@ def List_aircraft(page):
         tree.insert("", tk.END, values=values)
     for col in tree["columns"]:
         tree.column(col, anchor=tk.CENTER)
-    tree.pack()
+    tree.place(x=x_axis, y=y_axis)
 
 def update_aircraft():
     admin_window.admin_page.destroy()
@@ -102,6 +102,7 @@ def update_aircraft_submit():
     DataBase_connection.conn.commit()
     done = Label(update_aircraft_page, text = "Aircraft updated successfully")
     done.place(x=180, y=340)
+    List_aircraft(update_aircraft_page)
     
 def delete_aircraft(): 
     admin_window.admin_page.destroy()
@@ -123,10 +124,11 @@ def delete_aircraft_submit():
     DataBase_connection.conn.commit()
     done = Label(delete_aircraft_page, text = "Aircraft deleted successfully")
     done.place(x=190, y=330)
+    List_aircraft(delete_aircraft_page)
 
 def add_flight():
     admin_window.admin_page.destroy()
-    global serialNum_entry,flightNum_entry,arrivalTime_entry,departureTime_entry,sourceLocation_entry,destinationLocation_entry,duration_entry,airLine_entry
+    global serialNum_entry,flightNum_entry,arrivalTime_entry,departureTime_entry,sourceLocation_entry,destinationLocation_entry,duration_entry,airLine_entry,price_entry
     global add_flight_page
     add_flight_page = tk.Tk()
     add_flight_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
@@ -157,23 +159,23 @@ def add_flight():
     destinationLocation_label.place(x=10, y=360)
     destinationLocation_entry = tk.Entry(add_flight_page)
     destinationLocation_entry.place(x=150, y=360)
-    #Duration_Time
-    duration_label = tk.Label(add_flight_page, text="Duration Time")
-    duration_label.place(x=10, y=390)
-    duration_entry = tk.Entry(add_flight_page)
-    duration_entry.place(x=150, y=390)
     #AirLine
     airLine_label = tk.Label(add_flight_page, text="AirLine")
-    airLine_label.place(x=10, y=420)
+    airLine_label.place(x=10, y=390)
     airLine_entry = tk.Entry(add_flight_page)
-    airLine_entry.place(x=150, y=420)
+    airLine_entry.place(x=150, y=390)
+    #Price
+    price_label = tk.Label(add_flight_page, text="Price")
+    price_label.place(x=10, y=420)
+    price_entry = tk.Entry(add_flight_page)
+    price_entry.place(x=150, y=420)
     #Submit
     submit_button = tk.Button(add_flight_page, text="Submit", width=10, height=2, command=add_flight_submit)
     submit_button.place(x=210, y=450)
 
 def add_flight_submit():
-    insert_query="INSERT INTO FLIGHT (SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, DURATION, AIRLINE) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    values = (serialNum_entry.get(), arrivalTime_entry.get(), departureTime_entry.get(),sourceLocation_entry.get(), destinationLocation_entry.get(),duration_entry.get(),airLine_entry.get())
+    insert_query="INSERT INTO FLIGHT (SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, AIRLINE, PRICE) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    values = (serialNum_entry.get(), arrivalTime_entry.get(), departureTime_entry.get(), sourceLocation_entry.get(), destinationLocation_entry.get(),airLine_entry.get(),price_entry.get())
     DataBase_connection.cursor.execute(insert_query, values)
     DataBase_connection.conn.commit()
     done = Label(add_flight_page, text = "Flight added successfully")
@@ -181,7 +183,7 @@ def add_flight_submit():
 
 def List_flight(page, source = "default", destination = "default"):
     tree = ttk.Treeview(page)
-    tree["columns"]=("FLIGHT_NUM", "SERIAL_NUM", "ARRIVAL_TIME", "DEPARTURE_TIME", "SOURCE_LOCATION", "DESTINATION_LOCATION", "DURATION", "AIRLINE")
+    tree["columns"]=("FLIGHT_NUM", "SERIAL_NUM", "ARRIVAL_TIME", "DEPARTURE_TIME", "SOURCE_LOCATION", "DESTINATION_LOCATION", "PRICE", "AIRLINE")
     tree.column("#0", width=0, stretch=tk.NO)
     tree.column("FLIGHT_NUM", width=100)
     tree.column("SERIAL_NUM", width=100)
@@ -189,7 +191,7 @@ def List_flight(page, source = "default", destination = "default"):
     tree.column("DEPARTURE_TIME", width=120)
     tree.column("SOURCE_LOCATION", width=120)
     tree.column("DESTINATION_LOCATION", width=150)
-    tree.column("DURATION", width=90)
+    tree.column("PRICE", width=90)
     tree.column("AIRLINE", width=100)
 
     tree.heading("#0", text="", anchor=tk.CENTER)
@@ -199,13 +201,13 @@ def List_flight(page, source = "default", destination = "default"):
     tree.heading("DEPARTURE_TIME", text="DEPARTURE_TIME", anchor=tk.CENTER)
     tree.heading("SOURCE_LOCATION", text="SOURCE_LOCATION", anchor=tk.CENTER)
     tree.heading("DESTINATION_LOCATION", text="DESTINATION_LOCATION", anchor=tk.CENTER)
-    tree.heading("DURATION", text="DURATION", anchor=tk.CENTER)
+    tree.heading("PRICE", text="PRICE", anchor=tk.CENTER)
     tree.heading("AIRLINE", text="AIRLINE", anchor=tk.CENTER)
     
     if source == "default" and destination == "default":
         select_query = "SELECT * FROM FLIGHT"
     else:
-        select_query = f"SELECT FLIGHT_NUM, SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, DURATION, AIRLINE FROM FLIGHT WHERE SOURCE_LOCATION='{source}' AND DESTINATION_LOCATION='{destination}'"
+        select_query = f"SELECT FLIGHT_NUM, SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, PRICE, AIRLINE FROM FLIGHT WHERE SOURCE_LOCATION='{source}' AND DESTINATION_LOCATION='{destination}'"
     
     DataBase_connection.cursor.execute(select_query)
     rows = DataBase_connection.cursor.fetchall() 
@@ -226,7 +228,7 @@ def update_flight():
     y = int(home_window.screen_height/2 - 600/2)
     update_flight_page.geometry(f"900x500+{x}+{y}")
     List_flight(update_flight_page)
-    global flightNUM_id_entry, flightserial_id_entry,flightArrivalTime_entry,flightDEPARTURETime_entry
+    global flightNUM_id_entry, flightserial_id_entry,flightArrivalTime_entry,flightDEPARTURETime_entry,price_updated_entry
     flightNUM_id_entry_label = tk.Label(update_flight_page, text="Enter the flight Number: ")
     flightNUM_id_entry_label.place(x=10, y=10)
     flightNUM_id_entry= tk.Entry(update_flight_page)
@@ -242,15 +244,21 @@ def update_flight():
     flightDEPARTURETime_entry= tk.Entry(update_flight_page)
     flightDEPARTURETime_entry.place(x=480, y=40)
 
+    price_updated_label = tk.Label(update_flight_page, text="Enter the New Price: ")
+    price_updated_label.place(x=300, y=10)
+    price_updated_entry= tk.Entry(update_flight_page)
+    price_updated_entry.place(x=480, y=10)
+
     submit_button = tk.Button(update_flight_page, text="Submit", width=10, height=2, command=update_flight_submit)
     submit_button.place(x=400, y=400)
 
 def update_flight_submit():
-    update_query = f"UPDATE FLIGHT SET ARRIVAL_TIME = '{flightArrivalTime_entry.get()}', DEPARTURE_TIME = '{flightDEPARTURETime_entry.get()}' WHERE FLIGHT_NUM = '{flightNUM_id_entry.get()}'"
+    update_query = f"UPDATE FLIGHT SET ARRIVAL_TIME = '{flightArrivalTime_entry.get()}', DEPARTURE_TIME = '{flightDEPARTURETime_entry.get()}', PRICE='{price_updated_entry.get()}' WHERE FLIGHT_NUM = '{flightNUM_id_entry.get()}'"
     DataBase_connection.cursor.execute(update_query)
     DataBase_connection.conn.commit()
     done = Label(update_flight_page, text = "Flight updated successfully")
     done.place(x=360, y=350)
+    List_flight(update_flight_page)
 
 def delete_flight():
     admin_window.admin_page.destroy()
@@ -279,3 +287,87 @@ def delete_flight_submit():
         done = Label(delete_flight_page, text="Flight deleted successfully")
         
     done.place(x=190, y=400)
+    List_flight(delete_flight_page)
+
+def add_pilot():
+    admin_window.admin_page.destroy()
+    global Pname_entry, DOB_entry
+    add_pilot_page = tk.Tk()
+    add_pilot_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
+    add_pilot_page.title("Sign Up")
+    #input first name
+    Pname_label = tk.Label(add_pilot_page, text="Pilot Name")
+    Pname_label.place(x=10, y=10)
+    Pname_entry = tk.Entry(add_pilot_page)
+    Pname_entry.place(x=100, y=10)
+    #input date of birth
+    DOB_label = tk.Label(add_pilot_page, text="Date of Birth")
+    DOB_label.place(x=10, y=40)
+    global DOB_entry
+    DOB_entry= tk.Entry(add_pilot_page, highlightthickness=0, relief='flat')
+    DOB_entry.place(x=100, y=40)
+    DOB_entry.insert(0, 'YYYY-MM-DD')
+    DOB_entry.bind("<Button-1>", signup_window.pick_date)
+    #submit button
+    submit_button = tk.Button(add_pilot_page, text="Submit", width=10, height=2, command=submit_pilot)
+    submit_button.place(x=200, y=400)
+
+def submit_pilot():
+    dob = datetime.datetime.strptime(DOB_entry.get(), "%Y-%m-%d")
+    age = signup_window.calculate_age(dob)
+    insert_query = f"INSERT INTO PILOT (PNAME, DOB, AGE) VALUES ('{Pname_entry.get()}', '{DOB_entry.get()}', '{age}')"
+    DataBase_connection.cursor.execute(insert_query)
+    DataBase_connection.conn.commit()
+
+def List_pilot(page):
+    tree = ttk.Treeview(page)
+    tree["columns"] = ("SSN", "PNAME", "DOB", "AGE")
+
+    tree.column("#0", width=0, stretch=tk.NO)
+    tree.column("SSN", anchor=tk.CENTER, width=100)
+    tree.column("PNAME", anchor=tk.CENTER, width=100)
+    tree.column("DOB", anchor=tk.CENTER, width=100)
+    tree.column("AGE", anchor=tk.CENTER, width=100)
+
+    tree.heading("#0", text="", anchor=tk.CENTER)
+    tree.heading("SSN", text="SSN", anchor=tk.CENTER)
+    tree.heading("PNAME", text="PNAME", anchor=tk.CENTER)
+    tree.heading("DOB", text="DOB", anchor=tk.CENTER)
+    tree.heading("AGE", text="AGE", anchor=tk.CENTER)
+
+    select_query = "SELECT * FROM PILOT"
+    DataBase_connection.cursor.execute(select_query)
+    rows = DataBase_connection.cursor.fetchall()
+    for row in rows:
+        values = [str(value) for value in row]
+        tree.insert("", tk.END, values=values)
+
+    for col in tree["columns"]:
+        tree.column(col, anchor=tk.CENTER)
+    tree.place(x=500)
+
+def assign_pilotToAircraft():
+    admin_window.admin_page.destroy()
+    global assign_pilotToAircraft_page
+    assign_pilotToAircraft_page = tk.Tk()
+    x = int(home_window.screen_width/2 - 800/2)
+    y = int(home_window.screen_height/2 - 600/2)
+    assign_pilotToAircraft_page.geometry(f"900x500+{x}+{y}")
+    List_pilot(assign_pilotToAircraft_page)
+    List_aircraft(assign_pilotToAircraft_page)
+    global pilot_id_entry, aircraft_id_entry
+    pilot_id_label = tk.Label(assign_pilotToAircraft_page, text="Enter the Pilot id: ")
+    pilot_id_label.place(x=10, y=230)
+    pilot_id_entry = tk.Entry(assign_pilotToAircraft_page)
+    pilot_id_entry.place(x=150, y=230)
+    aircraft_id_label = tk.Label(assign_pilotToAircraft_page, text="Enter the Aircraft id: ")
+    aircraft_id_label.place(x=10, y=260)
+    aircraft_id_entry = tk.Entry(assign_pilotToAircraft_page)
+    aircraft_id_entry.place(x=150, y=260)
+    submit_button = tk.Button(assign_pilotToAircraft_page, text="Submit", width=10, height=2, command=assign_pilotToAircraft_submit)
+    submit_button.place(x=350, y=350)
+
+def assign_pilotToAircraft_submit():
+    insert_query = f"INSERT INTO FLYING (SSN, SERIAL_NUM) VALUES ('{pilot_id_entry.get()}', '{aircraft_id_entry.get()}')"
+    DataBase_connection.cursor.execute(insert_query)
+    DataBase_connection.conn.commit()

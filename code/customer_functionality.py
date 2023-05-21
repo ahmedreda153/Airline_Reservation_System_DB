@@ -59,31 +59,33 @@ def book_flight_submit():
     submit_button.place(x=220, y=450)
     
 def add_flight_to_customer():
-    select_flight = f"SELECT FLIGHT_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION FROM FLIGHT WHERE FLIGHT_NUM = '{flight_number_entry.get()}'"
+    select_flight = f"SELECT FLIGHT_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, PRICE FROM FLIGHT WHERE FLIGHT_NUM = '{flight_number_entry.get()}'"
     DataBase_connection.cursor.execute(select_flight)
     result_flight = DataBase_connection.cursor.fetchone()
     print(result_flight)
     
     print(signin_window.email)
-    select_person = f"SELECT ID, FNAME FROM PERSON WHERE EMAIL = '{signin_window.email}'"
+    select_person = f"SELECT ID, FNAME, LNAME FROM PERSON WHERE EMAIL = '{signin_window.email}'"
     DataBase_connection.cursor.execute(select_person)
     result_person = DataBase_connection.cursor.fetchone()
-    # print(result_person)
     print(selected_class_booking.get())
     if selected_class_booking.get() == 1:
         set_class = "First Class"
-        price = 1000 * 1.5
+        price = result_flight[5] * 1.5
     elif selected_class_booking.get() == 2:
         set_class = "Business Class"
-        price = 1000 * 1.25
+        price = result_flight[5] * 1.25
     else:
         set_class = "Economy Class"
-        price = 102
+        price = result_flight[5]
     print(price)
     insert_query = f"INSERT INTO TICKET (FLIGHT_NUM, ID, PRICE, PNAME, SOURCE_LOCATION, DESTINATION_LOCATION, SEAT, CLASS, ARRIVAL_TIME, DEPARTURE_TIME) VALUES ('{result_flight[0]}', '{result_person[0]}', '{price}', '{result_person[1]}', '{result_flight[3]}', '{result_flight[4]}', '1', '{set_class}', '{result_flight[1]}', '{result_flight[2]}')"
     DataBase_connection.cursor.execute(insert_query)
     DataBase_connection.conn.commit()
-    print("inserted")
+    DataBase_connection.cursor.execute(f"INSERT INTO PASSENGER (FLIGHT_NUM, P_ID, FNAME, LNAME) VALUES ('{result_flight[0]}', '{result_person[0]}', '{result_person[1]}', '{result_person[2]}')")
+    DataBase_connection.conn.commit()
+
+    
 
 def booked_tickets_list(page):
     tree = ttk.Treeview(page)
@@ -181,17 +183,19 @@ def change_class():
     submit_button.place(x=210, y=450)
     
 def change_class_submit():
-    DataBase_connection.cursor.execute(f"SELECT PRICE from TICKET where TICKETID = '{change_class_ticket_number_entry.get()}'")
-    result = DataBase_connection.cursor.fetchone()
+    DataBase_connection.cursor.execute(f"SELECT FLIGHT_NUM from TICKET where TICKETID = '{change_class_ticket_number_entry.get()}'")
+    flight_num = DataBase_connection.cursor.fetchone()
+    DataBase_connection.cursor.execute(f"SELECT PRICE from FLIGHT where FLIGHT_NUM = '{flight_num[0]}'")
+    flight_price = DataBase_connection.cursor.fetchone()
     if selected_class.get()==1:
         changed_value="First Class"
-        changed_price = result[0] * 1.5
+        changed_price = flight_price[0] * 1.5
     elif selected_class.get()==2:
         changed_value="Business Class"
-        changed_price = result[0] * 1.25
+        changed_price = flight_price[0] * 1.25
     else:
         changed_value="Economy Class"
-        changed_price = result[0]
+        changed_price = flight_price[0]
 
     DataBase_connection.cursor.execute(f"update TICKET set CLASS= '{changed_value}', PRICE= '{changed_price}' where TICKETID = '{change_class_ticket_number_entry.get()}'")
     DataBase_connection.conn.commit()

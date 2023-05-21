@@ -45,16 +45,16 @@ def home():
     home_page.title("Airline Reservation System")
     # Create label
     page_title = Label(home_page, text = "Airline Reservation System")
-    page_title.config(font =("Comic Sans MS", 22, "bold"))
+    page_title.config(font =("Trebuchet MS", 22, "bold"))
     page_title.pack(pady=50)
 
-    middle_words1 = Label(home_page, text = "Search less,\nTravel more!")
-    middle_words1.config(font =("Comic Sans MS", 18))
+    middle_words1 = Label(home_page, text = "    Search less,Travel more ✈️")
+    middle_words1.config(font =("Trebuchet MS", 18))
     middle_words1.pack(pady=15)
 
-    signUp = tk.Button(home_page, text="CREATE AN ACCOUNT", command=open_signup, font=("Comic Sans MS", 12, "bold"), foreground="white", background="black")
+    signUp = tk.Button(home_page, text="CREATE AN ACCOUNT", command=open_signup, font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
     # signUp.place(x=130, y=290)
     signUp.place(relx=0.5, rely=0.62, anchor=CENTER, height=50, width=250)
-    signIn = tk.Button(home_page, text="LOG IN", command=signin_window.sign_in, font=("Comic Sans MS", 12, "bold") , foreground="white", background="black")
+    signIn = tk.Button(home_page, text="LOG IN", command=signin_window.sign_in, font=("Trebuchet MS", 12, "bold") , foreground="white", background="black")
     # signIn.place(x=130, y=350)
     signIn.place(relx=0.5, rely=0.75, anchor=CENTER, height=50, width=250)

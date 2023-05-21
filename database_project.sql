@@ -1,8 +1,9 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2017                    */
-/* Created on:     5/20/2023 2:20:01 PM                         */
+/* Created on:     5/21/2023 5:09:07 PM                         */
 /*==============================================================*/
 
+CREATE DATABASE AIRLINE_RESERVATION
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
@@ -153,7 +154,7 @@ go
 /* Table: AIRCRAFT                                              */
 /*==============================================================*/
 create table AIRCRAFT (
-   SERIAL_NUM           int                  not null,
+   SERIAL_NUM           int IDENTITY(1, 1)   not null,
    CAPACITY             int                  null,
    MODEL                varchar(15)          null,
    AIRCRAFT_TYPE        varchar(15)          null,
@@ -166,13 +167,13 @@ go
 /* Table: FLIGHT                                                */
 /*==============================================================*/
 create table FLIGHT (
-   FLIGHT_NUM           int                  not null,
+   FLIGHT_NUM           int IDENTITY(1, 1)   not null,
    SERIAL_NUM           int                  not null,
-   ARRIVAL_TIME         datetime             null,
-   DEPARTURE_TIME       datetime             null,
    SOURCE_LOCATION      varchar(20)          null,
    DESTINATION_LOCATION varchar(20)          null,
-   DURATION             datetime             null,
+   ARRIVAL_TIME         datetime             null,
+   DEPARTURE_TIME       datetime             null,
+   PRICE                float(8)             null,
    AIRLINE              varchar(20)          null,
    constraint PK_FLIGHT primary key (FLIGHT_NUM)
 )
@@ -244,13 +245,13 @@ go
 /* Table: PERSON                                                */
 /*==============================================================*/
 create table PERSON (
-   ID                   int                  not null,
+   ID                   int IDENTITY(1, 1)   not null,
    FNAME                varchar(20)          null,
    LNAME                varchar(20)          null,
    EMAIL                varchar(50)          null,
    PERSON_PASSWORD      varchar(20)          null,
    PHONENUM             varchar(20)          null,
-   DOB                  datetime             null,
+   DOB                  date                 null,
    AGE                  int                  null,
    CITY                 varchar(20)          null,
    PERSON_STATE         varchar(20)          null,
@@ -265,10 +266,10 @@ go
 /* Table: PILOT                                                 */
 /*==============================================================*/
 create table PILOT (
-   SSN                  int                  not null,
-   PNAME                varchar(20)          null,
+   SSN                  int IDENTITY(1, 1)   not null,
+   PNAME                varchar(30)          null,
    AGE                  int                  null,
-   DOB                  datetime             null,
+   DOB                  date                 null,
    constraint PK_PILOT primary key (SSN)
 )
 go
@@ -277,15 +278,15 @@ go
 /* Table: TICKET                                                */
 /*==============================================================*/
 create table TICKET (
-   TICKETID             int                  not null,
+   TICKETID             int IDENTITY(1, 1)   not null,
    FLIGHT_NUM           int                  not null,
    ID                   int                  not null,
    SOURCE_LOCATION      varchar(20)          null,
    DESTINATION_LOCATION varchar(20)          null,
-   PNAME                varchar(20)          null,
-   PRICE                decimal(5,2)         null,
+   PNAME                varchar(30)          null,
+   PRICE                float(8)             null,
    SEAT                 varchar(5)           null,
-   CLASS                varchar(15)          null,
+   CLASS                varchar(25)          null,
    ARRIVAL_TIME         datetime             null,
    DEPARTURE_TIME       datetime             null,
    constraint PK_TICKET primary key (TICKETID)
@@ -314,7 +315,7 @@ go
 
 alter table FLIGHT
    add constraint FK_FLIGHT_BELONGS_T_AIRCRAFT foreign key (SERIAL_NUM)
-      references AIRCRAFT (SERIAL_NUM)
+      references AIRCRAFT (SERIAL_NUM) ON DELETE CASCADE
 go
 
 alter table FLYING
@@ -329,19 +330,19 @@ go
 
 alter table PASSENGER
    add constraint FK_PASSENGE_ASSIGN_FLIGHT foreign key (FLIGHT_NUM)
-      references FLIGHT (FLIGHT_NUM)
+      references FLIGHT (FLIGHT_NUM) ON DELETE CASCADE
 go
 
 alter table TICKET
    add constraint FK_TICKET_BOOK_PERSON foreign key (ID)
-      references PERSON (ID)
+      references PERSON (ID) ON DELETE CASCADE
 go
 
 alter table TICKET
    add constraint FK_TICKET_HAS_FLIGHT foreign key (FLIGHT_NUM)
-      references FLIGHT (FLIGHT_NUM)
+      references FLIGHT (FLIGHT_NUM) ON DELETE CASCADE
 go
 
-alter table TICKET
-   add PRICE float 
-go
+
+
+DBCC CHECKIDENT ('table_name', RESEED, 0);

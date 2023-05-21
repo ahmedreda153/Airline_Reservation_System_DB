@@ -35,3 +35,9 @@ def admin_page():
     #update info
     update_info_button = tk.Button(admin_page, text="Update Info", width=20, height=2, command=update_userInfo_window.update_info)
     update_info_button.place(x=10, y=130)
+    #add_pilot
+    add_pilot_button = tk.Button(admin_page, text="Add Pilot", width=20, height=2, command=admin_functionality.add_pilot)
+    add_pilot_button.place(x=10, y=170)
+    #assign pilot
+    assign_pilot_button = tk.Button(admin_page, text="Assign Pilot", width=20, height=2, command=admin_functionality.assign_pilotToAircraft)
+    assign_pilot_button.place(x=10, y=210)
