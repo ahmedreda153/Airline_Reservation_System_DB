@@ -7,7 +7,6 @@ import home_window
 import admin_window
 import customer_window
 import logo_gradiant
-import generate_report
 
 isOpen= False
 
@@ -44,7 +43,6 @@ def sign_in():
     submit_button.place(x=home_window.screen_width / 2 - 100, y=home_window.screen_height - 240, width=200, height=50)
 
 def check_valid_login(event):
-    generate_report.generate_pdf_report()
     if email_entry_login.get() == "" or password_entry_login.get() == "":
         error_message = event.create_text(home_window.screen_width / 2, 700, text="Please Fill All The Fields", fill="black", font =("Trebuchet MS", 24))
         event.after(5000, event.delete, error_message)

@@ -34,7 +34,7 @@ def book_flight():
     destination_entry = tk.Entry(book_flight_page,font=("Trebuchet MS", 15))
     destination_entry.place(x=700, y=190,width=250,height=30)
     #submit
-    submit_button = tk.Button(book_flight_page, text="Search", command=lambda:book_flight_submit(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button = tk.Button(book_flight_page, text="Search", command=book_flight_submit, font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
     submit_button.place(x=1200, y=180, height=50, width=250)
     admin_functionality.List_flight(book_flight_page, "default", "default", 40, 270)
     global flight_number_entry, selected_class_booking
@@ -44,7 +44,7 @@ def book_flight():
     canvas.create_text(145, 605, text="Select Class:", fill="black", font =("Trebuchet MS", 24))
     selected_class_booking = 1
     global radiobtn_photo1, radiobtn_photo2, radiobtn1, radiobtn2, radiobtn3
-    radiobtn_photo1 = PhotoImage(file="F:\database_project\code\\Radio Button 1 mt7dd.png")
+    radiobtn_photo1 = PhotoImage(file="F:\database_project\code\\Radio Button 1 mt7dd.png") # write the full path of the image in your computer
     radiobtn1 = tk.Button(book_flight_page, image=radiobtn_photo1, command=lambda: select_role(1), bd=0)
     radiobtn1.place(x=312, y=605, anchor=CENTER, height=20, width=20)
     canvas.create_text(380, 605, text="First Class", fill="black", font =("Trebuchet MS", 16))
@@ -56,7 +56,7 @@ def book_flight():
     radiobtn3.place(x=312, y=685, anchor=CENTER, height=20, width=20)
     canvas.create_text(400, 685, text="Economy Class", fill="black", font =("Trebuchet MS", 16))
 
-    submit_button = tk.Button(book_flight_page, text="Book Ticket", command=add_flight_to_customer, font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button = tk.Button(book_flight_page, text="Book Ticket", command=lambda:add_flight_to_customer(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
     submit_button.place(x=643, y=710, height=50, width=250)
 
 def book_flight_submit():

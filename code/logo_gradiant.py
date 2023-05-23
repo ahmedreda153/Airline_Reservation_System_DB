@@ -16,7 +16,7 @@ def create_gradient(canvas):
         canvas.create_rectangle(0, y, home_window.screen_width, y+1, fill=color, outline="")
 
 def create_logo(canvas):
-    original_image = Image.open("F:\database_project\code\\travel_agency_logo_concept300.png")
+    original_image = Image.open("F:\database_project\code\\travel_agency_logo_concept300.png") # write the full path of the image in your computer
     width, height = original_image.size
     new_width = width // 10  
     new_height = height // 10 

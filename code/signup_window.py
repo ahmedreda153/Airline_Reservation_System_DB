@@ -109,7 +109,7 @@ def sign_up():
     #input role
     canvas.create_text(home_window.screen_width / 2 - 400, 650, text="Select your Role:", fill="black", font =("Trebuchet MS", 24))
     global radiobtn_photo1, radiobtn1, radiobtn_photo2, radiobtn2
-    radiobtn_photo1 = PhotoImage(file="F:\database_project\code\\Radio Button 1 mt7dd.png")
+    radiobtn_photo1 = PhotoImage(file="F:\database_project\code\\Radio Button 1 mt7dd.png") # write the full path of the image in your computer
     radiobtn1 = tk.Button(sign_up_page, image=radiobtn_photo1, command=lambda: select_role(1), bd=0)
     radiobtn1.place(x=545, y=655, anchor=CENTER, height=20, width=20)
     canvas.create_text(615, 655, text="Customer", fill="black", font =("Trebuchet MS", 16))

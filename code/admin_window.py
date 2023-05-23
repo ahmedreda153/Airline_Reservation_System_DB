@@ -20,7 +20,7 @@ def admin_page():
 
     canvas= Canvas(administrator_page, width= home_window.screen_width, height= home_window.screen_height)
     logo_gradiant.background(canvas)
-    back_image = ImageTk.PhotoImage(Image.open("F:/database_project/code/plane.png"))
+    back_image = ImageTk.PhotoImage(Image.open("F:/database_project/code/plane.png")) # write the full path of the image in your computer
     canvas.create_image(900, 415, image=back_image)
     canvas.back_image = back_image
     canvas.pack()

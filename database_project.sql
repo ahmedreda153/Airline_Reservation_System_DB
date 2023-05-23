@@ -320,7 +320,7 @@ go
 
 alter table FLYING
    add constraint FK_FLYING_FLYING_AIRCRAFT foreign key (SERIAL_NUM)
-      references AIRCRAFT (SERIAL_NUM)
+      references AIRCRAFT (SERIAL_NUM) ON DELETE CASCADE
 go
 
 alter table FLYING
@@ -346,6 +346,3 @@ alter table TICKET
    add constraint FK_TICKET_HAS_FLIGHT foreign key (FLIGHT_NUM)
       references FLIGHT (FLIGHT_NUM) ON DELETE CASCADE
 go
-
-
-DBCC CHECKIDENT ('table_name', RESEED, 0);

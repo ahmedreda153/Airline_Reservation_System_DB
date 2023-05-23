@@ -293,7 +293,7 @@ def List_flight(page, source = "default", destination = "default", x_axis = 0, y
     style.configure("Treeview.Column", foreground="black", font=("Trebuchet MS", 6, "bold"))
 
     if source == "default" and destination == "default":
-        select_query = "SELECT * FROM FLIGHT"
+        select_query = "SELECT FLIGHT_NUM, SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, PRICE, AIRLINE FROM FLIGHT"
     else:
         select_query = f"SELECT FLIGHT_NUM, SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, PRICE, AIRLINE FROM FLIGHT WHERE SOURCE_LOCATION='{source}' AND DESTINATION_LOCATION='{destination}'"
     

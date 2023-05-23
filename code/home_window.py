@@ -4,9 +4,9 @@ import tkinter as tk
 from PIL import ImageTk, Image
 import signup_window
 import signin_window
-import customtkinter
 import logo_gradiant
 import customer_window
+import generate_report
 
 global home_page, screen_width, screen_height, x, y
 
@@ -17,6 +17,7 @@ def back(page1, fun_page):
 home_isOpened = False
 
 def home():
+    generate_report.generate_pdf_report()
     def open_signup():
         import signup_window
         signup_window.sign_up()
