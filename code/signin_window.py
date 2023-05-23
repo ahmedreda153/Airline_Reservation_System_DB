@@ -1,42 +1,62 @@
 from tkinter import *
 from tkcalendar import *
 import tkinter as tk
-import tkinter as tk
+from PIL import ImageTk, Image
 import DataBase_connection
 import home_window
 import admin_window
 import customer_window
+import logo_gradiant
+import generate_report
+
+isOpen= False
 
 def sign_in():
-    home_window.home_page.destroy()
-    global sign_in_page, email_entry_login, password_entry_login
-    sign_in_page = tk.Tk()
-    sign_in_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
-    sign_in_page.title("Sign In")
-    #input email
-    email_label = tk.Label(sign_in_page, text="Email")
-    email_label.place(x=10, y=10)
-    email_entry_login = tk.Entry(sign_in_page)
-    email_entry_login.place(x=100, y=10)
-    #input pw
-    password_label = tk.Label(sign_in_page, text="password")
-    password_label.place(x=10, y=40)
-    password_entry_login = tk.Entry(sign_in_page)
-    password_entry_login.place(x=100, y=40)
+    global isOpen
+    isOpen=True
+    if home_window.home_isOpened:
+        home_window.home_page.destroy()
+        home_window.home_isOpened=False
 
-    submit_button = tk.Button(sign_in_page, text="Submit", width=10, height=2, command=check_valid_login)
-    submit_button.place(x=210, y=300)
-    
-def check_valid_login():
-    global email
-    email = email_entry_login.get()
-    select_query = f"select EMAIL, PERSON_PASSWORD, PERSON_ROLE from PERSON WHERE EMAIL = '{email_entry_login.get()}' AND PERSON_PASSWORD = '{password_entry_login.get()}'"
-    DataBase_connection.cursor.execute(select_query)
-    result = DataBase_connection.cursor.fetchone()
-    if result == None:
-        failed = Label(sign_in_page, text = "login failed")
-        failed.place(x=215, y=175)
-    elif(result[2]=='Admin'):
-        admin_window.admin_page()
+    global sign_in_page, email_entry_login, password_entry_login, canvas
+    #input email
+    sign_in_page = tk.Tk()
+    sign_in_page.title("Sign In")
+    sign_in_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+
+    canvas= Canvas(sign_in_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
+    back_btn = tk.Button(sign_in_page, text="⬅", command= lambda: home_window.back(sign_in_page, home_window.home), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER)
+    #large the button
+    canvas.create_text(home_window.screen_width  / 2, 170, text="Login to your account", fill="black", font =("Trebuchet MS", 44, "bold"))
+    canvas.create_text(home_window.screen_width / 2-175 , 340, text="Email", fill="black", font =("Trebuchet MS", 24))
+    email_entry_login = tk.Entry(sign_in_page, font=("Trebuchet MS", 15))
+    email_entry_login.place(x=700, y=325,width=250,height=30)
+    #input pw
+    canvas.create_text(home_window.screen_width /2-150, 470, text="Password", fill="black", font =("Trebuchet MS", 24))
+    password_entry_login = tk.Entry(sign_in_page, show="*", font=("Trebuchet MS", 15))
+    password_entry_login.place(x=700, y=455,width=250,height=30)
+
+    submit_button = tk.Button(sign_in_page, text="LOGIN", command=lambda:check_valid_login(canvas), font=("Trebuchet MS", 12, "bold") , foreground="white", background="black")
+    submit_button.place(x=home_window.screen_width / 2 - 100, y=home_window.screen_height - 240, width=200, height=50)
+
+def check_valid_login(event):
+    generate_report.generate_pdf_report()
+    if email_entry_login.get() == "" or password_entry_login.get() == "":
+        error_message = event.create_text(home_window.screen_width / 2, 700, text="Please Fill All The Fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, event.delete, error_message)
     else:
-        customer_window.customer_page()
+        global email
+        email = email_entry_login.get()
+        select_query = f"select EMAIL, PERSON_PASSWORD, PERSON_ROLE from PERSON WHERE EMAIL = '{email_entry_login.get()}' AND PERSON_PASSWORD = '{password_entry_login.get()}'"
+        DataBase_connection.cursor.execute(select_query)
+        result = DataBase_connection.cursor.fetchone()
+        if result == None:
+            canvas.create_text(home_window.screen_width / 2, home_window.screen_height - 270, text="login failed", fill="black", font =("Trebuchet MS", 24))
+        elif(result[2]=='Admin'):
+            admin_window.admin_page()
+        else:
+            customer_window.customer_page()

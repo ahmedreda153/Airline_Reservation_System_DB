@@ -3,61 +3,82 @@ from tkcalendar import *
 import tkinter as tk
 import datetime
 from tkinter import ttk
+from PIL import ImageTk, Image
 import DataBase_connection
 import home_window
 import admin_window
 import signup_window
+import logo_gradiant
 
 def add_aircraft():
-    admin_window.admin_page.destroy()
+    admin_window.administrator_page.destroy()
     global model_entry,type_entry,capacity_entry,manufacturer_entry
     global add_aircraft_page
+
     add_aircraft_page = tk.Tk()
-    add_aircraft_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
-    add_aircraft_page.title("Air Craft")
+    add_aircraft_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+    add_aircraft_page.resizable(False, False)
+
+    canvas= Canvas(add_aircraft_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
+    back_btn = tk.Button(add_aircraft_page, text="⬅", command= lambda: home_window.back(add_aircraft_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+
+    add_aircraft_page.title("Add Air Craft")
     global model_entry,type_entry,capacity_entry,manufacturer_entry
-    #input model
-    model_label = tk.Label(add_aircraft_page, text="Model")
-    model_label.place(x=10, y=10)
-    model_entry = tk.Entry(add_aircraft_page)
-    model_entry.place(x=100, y=10)
+    #page title
+    canvas.create_text(home_window.screen_width / 2 - 170 , 150, anchor=tk.NW, text="Add An Aircraft", fill="black", font =("Trebuchet MS", 36, "bold"))
     #input type
-    type_label = tk.Label(add_aircraft_page, text="Type")
-    type_label.place(x=10, y=40)
-    type_entry = tk.Entry(add_aircraft_page)
-    type_entry.place(x=100, y=40)
+    canvas.create_text(home_window.screen_width / 2 - 300 , 260, anchor=tk.NW, text="Type ", fill="black", font =("Trebuchet MS", 24))
+    type_entry = tk.Entry(add_aircraft_page,font=("Trebuchet MS", 15))
+    type_entry.place(x=800, y=267, width=250, height=30)
+    #input model
+    canvas.create_text(home_window.screen_width / 2 - 300 , 360, anchor=tk.NW, text="Model ", fill="black", font =("Trebuchet MS", 24))
+    model_entry = tk.Entry(add_aircraft_page,font=("Trebuchet MS", 15))
+    model_entry.place(x=800, y=367, width=250, height=30)
     #input capacity
-    capacity_label = tk.Label(add_aircraft_page, text="Capacity")
-    capacity_label.place(x=10, y=70)
-    capacity_entry = tk.Entry(add_aircraft_page)
-    capacity_entry.place(x=100, y=70)
+    canvas.create_text(home_window.screen_width / 2 - 300 , 460, anchor=tk.NW, text="Capacity ", fill="black", font =("Trebuchet MS", 24))
+    capacity_entry = tk.Entry(add_aircraft_page,font=("Trebuchet MS", 15))
+    capacity_entry.place(x=800, y=467, width=250, height=30)
     #input manufacturer
-    manufacturer_label = tk.Label(add_aircraft_page, text="Manufacturer")
-    manufacturer_label.place(x=10, y=100)
-    manufacturer_entry = tk.Entry(add_aircraft_page)
-    manufacturer_entry.place(x=100, y=100)
+    canvas.create_text(home_window.screen_width / 2 - 300 , 560, anchor=tk.NW, text="Manufacturer ", fill="black", font =("Trebuchet MS", 24))
+    manufacturer_entry = tk.Entry(add_aircraft_page,font=("Trebuchet MS", 15))
+    manufacturer_entry.place(x=800, y=567, width=250, height=30)
 
-    submit_button = tk.Button(add_aircraft_page, text="Submit", width=10, height=2, command=add_aircraft_submit)
-    submit_button.place(x=210, y=300)
+    update_button = tk.Button(add_aircraft_page, text="ADD AIRCRAFT", command= lambda:add_aircraft_submit(canvas), font=("Trebuchet MS", 12, "bold") , foreground="white", background="black")
+    update_button.place(x=home_window.screen_width / 2 - 100, y=700, width=250, height=50)
 
-def add_aircraft_submit():
-    insert_query="INSERT INTO AIRCRAFT (CAPACITY, MODEL, AIRCRAFT_TYPE, MANUFACTURER) VALUES (?, ?, ?, ?)"
-    values = (capacity_entry.get(), model_entry.get(),type_entry.get(), manufacturer_entry.get())
-    DataBase_connection.cursor.execute(insert_query, values)
-    DataBase_connection.conn.commit()
-    done = Label(add_aircraft_page, text = "aircraft added successfully")
-    done.after(2000, lambda: done.destroy())
-    done.place(x=215, y=175)
+def add_aircraft_submit(event):
+    if model_entry.get() == "" or type_entry.get() == "" or capacity_entry.get() == "" or manufacturer_entry.get() == "":
+        error_message = event.create_text(home_window.screen_width / 2, 670, text="Please fill all the fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        insert_query="INSERT INTO AIRCRAFT (CAPACITY, MODEL, AIRCRAFT_TYPE, MANUFACTURER) VALUES (?, ?, ?, ?)"
+        values = (capacity_entry.get(), model_entry.get(),type_entry.get(), manufacturer_entry.get())
+        DataBase_connection.cursor.execute(insert_query, values)
+        DataBase_connection.conn.commit()
+        message = event.create_text(home_window.screen_width / 2, 670, text="Aircraft added successfully", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(message))
+        type_entry.delete(0, END)
+        model_entry.delete(0, END)
+        capacity_entry.delete(0, END)
+        manufacturer_entry.delete(0, END)
     
 def List_aircraft(page, x_axis = 0, y_axis = 0):
+    for widget in page.winfo_children():
+        if isinstance(widget, ttk.Treeview):
+            widget.destroy()  
     tree = ttk.Treeview(page)
+    style =ttk.Style()
     tree["columns"]=("SERIAL_NUM","AIRCRAFT_TYPE","MODEL", "CAPACITY", "MANUFACTURER")
     tree.column("#0", width=0, stretch=tk.NO)
-    tree.column("SERIAL_NUM", width=100)
-    tree.column("AIRCRAFT_TYPE", width=100)
-    tree.column("MODEL", width=100)
-    tree.column("CAPACITY", width=100)
-    tree.column("MANUFACTURER", width=100)
+    tree.column("SERIAL_NUM", width=153)
+    tree.column("AIRCRAFT_TYPE", width=180)
+    tree.column("MODEL", width=153)
+    tree.column("CAPACITY", width=120)
+    tree.column("MANUFACTURER", width=170)
 
     tree.heading("#0", text="", anchor=tk.CENTER)
     tree.heading("SERIAL_NUM", text="SERIAL_NUM",anchor=tk.CENTER)
@@ -65,6 +86,8 @@ def List_aircraft(page, x_axis = 0, y_axis = 0):
     tree.heading("MODEL", text="MODEL",anchor=tk.CENTER)
     tree.heading("CAPACITY", text="CAPACITY",anchor=tk.CENTER)
     tree.heading("MANUFACTURER", text="MANUFACTURER",anchor=tk.CENTER)
+    style.configure("Treeview.Heading", foreground="black", font=("Trebuchet MS", 16, "bold"))
+    style.configure("Treeview.Column", foreground="black", font=("Trebuchet MS", 6, "bold"))
 
     select_query = "SELECT SERIAL_NUM, AIRCRAFT_TYPE, MODEL, CAPACITY, MANUFACTURER from AIRCRAFT"
     DataBase_connection.cursor.execute(select_query)
@@ -75,266 +98,403 @@ def List_aircraft(page, x_axis = 0, y_axis = 0):
     for col in tree["columns"]:
         tree.column(col, anchor=tk.CENTER)
     tree.place(x=x_axis, y=y_axis)
+    # Configure tags to color rows
+    tree.tag_configure("oddrow", background="#e9f2f7")
+    tree.tag_configure("evenrow", background="#91b9cf")
+    tree.tag_configure("customfont", font=("Trebuchet MS",12, "normal"))
+
+    # Apply tags to alternate rows
+    for i in range(len(tree.get_children())):
+        if i % 2 == 0:
+            tree.item(tree.get_children()[i], tags=("customfont","evenrow"))
+        else:
+            tree.item(tree.get_children()[i], tags=("customfont","oddrow"))
+    
+    tree_height = len(tree.get_children())
+    tree["height"] = tree_height
+    if tree_height > 10:
+        tree["height"] = 10
 
 def update_aircraft():
-    admin_window.admin_page.destroy()
+    admin_window.administrator_page.destroy()
     global update_aircraft_page
     update_aircraft_page = tk.Tk()
-    update_aircraft_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
-    List_aircraft(update_aircraft_page)
+    update_aircraft_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+    update_aircraft_page.resizable(False, False)
+
+    canvas= Canvas(update_aircraft_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
+    back_btn = tk.Button(update_aircraft_page, text="⬅", command= lambda: home_window.back(update_aircraft_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+
+    List_aircraft(update_aircraft_page, home_window.screen_width / 2 - 40, 200)
     global aircraft_id_entry, aircraft_capacity_entry
-    aircraft_id_label = tk.Label(update_aircraft_page, text="Enter the aircraft id: ")
-    aircraft_id_label.place(x=10, y=250)
-    aircraft_id_entry = tk.Entry(update_aircraft_page)
-    aircraft_id_entry.place(x=200, y=250)
+    canvas.create_text(177, 310, text="AirCraft ID", fill="black", font =("Trebuchet MS", 24))
+    aircraft_id_entry = tk.Entry(update_aircraft_page,font=("Trebuchet MS", 15))
+    aircraft_id_entry.place(x=350, y=300,width=250,height=30)
+
+    canvas.create_text(200, 410, text="New Capacity", fill="black", font =("Trebuchet MS", 24))
+    aircraft_capacity_entry =tk.Entry(update_aircraft_page,font=("Trebuchet MS", 15)) 
+    aircraft_capacity_entry.place(x=350, y=400,width=250,height=30)
+    tk.Entry(update_aircraft_page,font=("Trebuchet MS", 15))
+    submit_button = tk.Button(update_aircraft_page, text="Update Aircraft", command=lambda:update_aircraft_submit(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button.place(x=643, y=710, height=50, width=250)
     
-    aircraft_capacity_label = tk.Label(update_aircraft_page, text="Enter the aircraft new capacity: ")
-    aircraft_capacity_label.place(x=10, y=280)
-    aircraft_capacity_entry = tk.Entry(update_aircraft_page)
-    aircraft_capacity_entry.place(x=200, y=280)
-    #aircraft_status = Entry("Enter the aircraft new status: ")
-    submit_button = tk.Button(update_aircraft_page, text="Submit", width=10, height=2, command=update_aircraft_submit)
-    submit_button.place(x=210, y=400)
-    
-def update_aircraft_submit():
-    update_query = f"UPDATE AIRCRAFT SET CAPACITY = '{aircraft_capacity_entry.get()}' WHERE SERIAL_NUM = '{aircraft_id_entry.get()}'"
-    DataBase_connection.cursor.execute(update_query)
-    DataBase_connection.conn.commit()
-    done = Label(update_aircraft_page, text = "Aircraft updated successfully")
-    done.place(x=180, y=340)
-    List_aircraft(update_aircraft_page)
+def update_aircraft_submit(event):
+    if aircraft_id_entry.get() == "" or aircraft_capacity_entry.get() == "":
+        error_message = event.create_text(home_window.screen_width / 2, 670, text="Please fill all the fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        update_query = f"UPDATE AIRCRAFT SET CAPACITY = '{aircraft_capacity_entry.get()}' WHERE SERIAL_NUM = '{aircraft_id_entry.get()}'"
+        DataBase_connection.cursor.execute(update_query)
+        DataBase_connection.conn.commit()
+        List_aircraft(update_aircraft_page, home_window.screen_width / 2 - 40, 200)
+        Message = event.create_text(home_window.screen_width / 2, 670, text="Aircraft Updated Successfully", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(Message))
+    List_aircraft(update_aircraft_page, home_window.screen_width / 2 - 40, 200)
+    aircraft_id_entry.delete(0, END)
+    aircraft_capacity_entry.delete(0, END)
     
 def delete_aircraft(): 
-    admin_window.admin_page.destroy()
-    global delete_aircraft_page
-    delete_aircraft_page = tk.Tk()
-    delete_aircraft_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
-    List_aircraft(delete_aircraft_page)
-    global aircraft_deleted_id_entry
-    aircraft_deleted_id_label = tk.Label(delete_aircraft_page, text="Enter the aircraft id: ")
-    aircraft_deleted_id_label.place(x=10, y=250)
-    aircraft_deleted_id_entry = tk.Entry(delete_aircraft_page)
-    aircraft_deleted_id_entry.place(x=150, y=250)
-    submit_button = tk.Button(delete_aircraft_page, text="Submit", width=10, height=2, command=delete_aircraft_submit)
-    submit_button.place(x=210, y=400)
+    admin_window.administrator_page.destroy()
+    global delete_aircraft_page, aircraft_deleted_id_entry
 
-def delete_aircraft_submit():
-    delete_query = f"DELETE FROM AIRCRAFT WHERE SERIAL_NUM ='{aircraft_deleted_id_entry.get()}'"
-    DataBase_connection.cursor.execute(delete_query)
-    DataBase_connection.conn.commit()
-    done = Label(delete_aircraft_page, text = "Aircraft deleted successfully")
-    done.place(x=190, y=330)
-    List_aircraft(delete_aircraft_page)
+    delete_aircraft_page = tk.Tk()
+    delete_aircraft_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+    delete_aircraft_page.resizable(False, False)
+
+    canvas= Canvas(delete_aircraft_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
+    back_btn = tk.Button(delete_aircraft_page, text="⬅", command= lambda: home_window.back(delete_aircraft_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+
+    List_aircraft(delete_aircraft_page, home_window.screen_width / 2 - 40, 200)
+    canvas.create_text(200, 350, text="AirCraft ID", fill="black", font =("Trebuchet MS", 24))
+    aircraft_deleted_id_entry = tk.Entry(delete_aircraft_page,font=("Trebuchet MS", 15))
+    aircraft_deleted_id_entry.place(x=350, y=340,width=250,height=30)
+
+    submit_button = tk.Button(delete_aircraft_page, text="DELETE AIRCRAFT", command=lambda:delete_aircraft_submit(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button.place(x=643, y=710, height=50, width=250)
+
+def delete_aircraft_submit(event):
+    if aircraft_deleted_id_entry.get() == "":
+        error_message = event.create_text(home_window.screen_width / 2, 670, text="Please enter the Aircraft ID", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        delete_query = f"DELETE FROM AIRCRAFT WHERE SERIAL_NUM ='{aircraft_deleted_id_entry.get()}'"
+        DataBase_connection.cursor.execute(delete_query)
+        DataBase_connection.conn.commit()
+        List_aircraft(delete_aircraft_page, home_window.screen_width / 2 - 40, 200)
+        Message = event.create_text(home_window.screen_width / 2, 670, text="Aircraft Deleted Successfully", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(Message))
+        aircraft_deleted_id_entry.delete(0, END)
 
 def add_flight():
-    admin_window.admin_page.destroy()
+    admin_window.administrator_page.destroy()
     global serialNum_entry,flightNum_entry,arrivalTime_entry,departureTime_entry,sourceLocation_entry,destinationLocation_entry,duration_entry,airLine_entry,price_entry
     global add_flight_page
+
     add_flight_page = tk.Tk()
-    add_flight_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
+    add_flight_page.resizable(False, False)
+    add_flight_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+
+    canvas= Canvas(add_flight_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
     add_flight_page.title("Flight")
-    List_aircraft(add_flight_page)
+    List_aircraft(add_flight_page,home_window.screen_width / 2 - 40, 200)
+    back_btn = tk.Button(add_flight_page, text="⬅", command= lambda: home_window.back(add_flight_page, admin_window.admin_page),font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
     #Serial_Num
-    serialNum_label = tk.Label(add_flight_page, text="Aircraft Serial Number")
-    serialNum_label.place(x=10, y=240)
-    serialNum_entry = tk.Entry(add_flight_page)
-    serialNum_entry.place(x=150, y=240)
+    canvas.create_text(200, 220, text="Aircraft Serial Number", fill="black", font =("Trebuchet MS", 24))
+    serialNum_entry = tk.Entry(add_flight_page,font=("Trebuchet MS", 15))
+    serialNum_entry.place(x=390, y=210,width=250,height=30)
     #Arrival_Time
-    arrivalTime_label = tk.Label(add_flight_page, text="Arrival Time")
-    arrivalTime_label.place(x=10, y=270)
-    arrivalTime_entry = tk.Entry(add_flight_page)
-    arrivalTime_entry.place(x=150, y=270)
+    canvas.create_text(127, 280, text="Arrival Time", fill="black", font =("Trebuchet MS", 24))
+    arrivalTime_entry = logo_gradiant.CustomEntry(add_flight_page, "YYYY-MM-DD HH:MM:SS", font=("Trebuchet MS", 15), fg="grey", justify="center")
+    arrivalTime_entry.place(x=390, y=270,width=250,height=30)
     #Departure_Time
-    departureTime_label = tk.Label(add_flight_page, text="Departure Time")
-    departureTime_label.place(x=10, y=300)
-    departureTime_entry = tk.Entry(add_flight_page)
-    departureTime_entry.place(x=150, y=300)
+    canvas.create_text(150, 340, text="Departure Time", fill="black", font =("Trebuchet MS", 24))
+    departureTime_entry = logo_gradiant.CustomEntry(add_flight_page, "YYYY-MM-DD HH:MM:SS", font=("Trebuchet MS", 15), fg="grey", justify="center")
+    departureTime_entry.place(x=390, y=330,width=250,height=30)
     #Source_Location
-    sourceLocation_label = tk.Label(add_flight_page, text="Source location")
-    sourceLocation_label.place(x=10, y=330)
-    sourceLocation_entry = tk.Entry(add_flight_page)
-    sourceLocation_entry.place(x=150, y=330)
+    canvas.create_text(150, 400, text="Source location", fill="black", font =("Trebuchet MS", 24))
+    sourceLocation_entry = tk.Entry(add_flight_page,font=("Trebuchet MS", 15))
+    sourceLocation_entry.place(x=390, y=390,width=250,height=30)
     #Destination_Location
-    destinationLocation_label = tk.Label(add_flight_page, text="Destination Location")
-    destinationLocation_label.place(x=10, y=360)
-    destinationLocation_entry = tk.Entry(add_flight_page)
-    destinationLocation_entry.place(x=150, y=360)
+    canvas.create_text(187, 460, text="Destination Location", fill="black", font =("Trebuchet MS", 24))
+    destinationLocation_entry = tk.Entry(add_flight_page,font=("Trebuchet MS", 15))
+    destinationLocation_entry.place(x=390, y=450,width=250,height=30)
     #AirLine
-    airLine_label = tk.Label(add_flight_page, text="AirLine")
-    airLine_label.place(x=10, y=390)
-    airLine_entry = tk.Entry(add_flight_page)
-    airLine_entry.place(x=150, y=390)
+    canvas.create_text(122, 520, text="Flight Price", fill="black", font =("Trebuchet MS", 24))
+    price_entry = tk.Entry(add_flight_page,font=("Trebuchet MS", 15))
+    price_entry.place(x=390, y=510,width=250,height=30)
     #Price
-    price_label = tk.Label(add_flight_page, text="Price")
-    price_label.place(x=10, y=420)
-    price_entry = tk.Entry(add_flight_page)
-    price_entry.place(x=150, y=420)
+    canvas.create_text(87, 580, text="Airline", fill="black", font =("Trebuchet MS", 24))
+    airLine_entry = tk.Entry(add_flight_page,font=("Trebuchet MS", 15))
+    airLine_entry.place(x=390, y=570,width=250,height=30)
     #Submit
-    submit_button = tk.Button(add_flight_page, text="Submit", width=10, height=2, command=add_flight_submit)
-    submit_button.place(x=210, y=450)
+    submit_button = tk.Button(add_flight_page, text="Add Flight", command=lambda: add_flight_submit(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button.place(x=643, y=710, height=50, width=250)
 
-def add_flight_submit():
-    insert_query="INSERT INTO FLIGHT (SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, AIRLINE, PRICE) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    values = (serialNum_entry.get(), arrivalTime_entry.get(), departureTime_entry.get(), sourceLocation_entry.get(), destinationLocation_entry.get(),airLine_entry.get(),price_entry.get())
-    DataBase_connection.cursor.execute(insert_query, values)
-    DataBase_connection.conn.commit()
-    done = Label(add_flight_page, text = "Flight added successfully")
-    done.place(x=310, y=350)
+def add_flight_submit(event):
+    if serialNum_entry.get() == "" or arrivalTime_entry.get() == "" or departureTime_entry.get() == "" or sourceLocation_entry.get() == "" or destinationLocation_entry.get() == "" or airLine_entry.get() == "" or price_entry.get() == "":
+        error_message = event.create_text(home_window.screen_width / 2, 670, text="Please fill all the fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        insert_query="INSERT INTO FLIGHT (SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, AIRLINE, PRICE) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        values = (serialNum_entry.get(), arrivalTime_entry.get(), departureTime_entry.get(), sourceLocation_entry.get(), destinationLocation_entry.get(),airLine_entry.get(),price_entry.get())
+        DataBase_connection.cursor.execute(insert_query, values)
+        DataBase_connection.conn.commit()
+        message = event.create_text(home_window.screen_width / 2, 670, text="Flight added successfully", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(message))
+        serialNum_entry.delete(0, END)
+        arrivalTime_entry.delete(0, END)
+        arrivalTime_entry.insert(0, "YYYY-MM-DD HH:MM:SS")
+        departureTime_entry.delete(0, END)
+        departureTime_entry.insert(0, "YYYY-MM-DD HH:MM:SS")
+        sourceLocation_entry.delete(0, END)
+        destinationLocation_entry.delete(0, END)
+        price_entry.delete(0, END)
+        airLine_entry.delete(0, END)
 
-def List_flight(page, source = "default", destination = "default"):
+def List_flight(page, source = "default", destination = "default", x_axis = 0, y_axis = 0):
+    for widget in page.winfo_children():
+        if isinstance(widget, ttk.Treeview):
+            widget.destroy()    
+    style =ttk.Style()
     tree = ttk.Treeview(page)
     tree["columns"]=("FLIGHT_NUM", "SERIAL_NUM", "ARRIVAL_TIME", "DEPARTURE_TIME", "SOURCE_LOCATION", "DESTINATION_LOCATION", "PRICE", "AIRLINE")
     tree.column("#0", width=0, stretch=tk.NO)
-    tree.column("FLIGHT_NUM", width=100)
-    tree.column("SERIAL_NUM", width=100)
-    tree.column("ARRIVAL_TIME", width=100)
-    tree.column("DEPARTURE_TIME", width=120)
-    tree.column("SOURCE_LOCATION", width=120)
-    tree.column("DESTINATION_LOCATION", width=150)
-    tree.column("PRICE", width=90)
-    tree.column("AIRLINE", width=100)
+    tree.column("FLIGHT_NUM", width=170)
+    tree.column("SERIAL_NUM", width=170)
+    tree.column("ARRIVAL_TIME", width=192)
+    tree.column("DEPARTURE_TIME", width=192)
+    tree.column("SOURCE_LOCATION", width=192)
+    tree.column("DESTINATION_LOCATION", width=192)
+    tree.column("PRICE", width=140)
+    tree.column("AIRLINE", width=192)
 
     tree.heading("#0", text="", anchor=tk.CENTER)
     tree.heading("FLIGHT_NUM", text="FLIGHT_NUM", anchor=tk.CENTER)
     tree.heading("SERIAL_NUM", text="SERIAL_NUM", anchor=tk.CENTER)
     tree.heading("ARRIVAL_TIME", text="ARRIVAL_TIME", anchor=tk.CENTER)
     tree.heading("DEPARTURE_TIME", text="DEPARTURE_TIME", anchor=tk.CENTER)
-    tree.heading("SOURCE_LOCATION", text="SOURCE_LOCATION", anchor=tk.CENTER)
-    tree.heading("DESTINATION_LOCATION", text="DESTINATION_LOCATION", anchor=tk.CENTER)
+    tree.heading("SOURCE_LOCATION", text="SOURCE", anchor=tk.CENTER)
+    tree.heading("DESTINATION_LOCATION", text="DESTINATION", anchor=tk.CENTER)
     tree.heading("PRICE", text="PRICE", anchor=tk.CENTER)
     tree.heading("AIRLINE", text="AIRLINE", anchor=tk.CENTER)
-    
+    style.configure("Treeview.Heading", foreground="black", font=("Trebuchet MS", 16, "bold"))
+    style.configure("Treeview.Column", foreground="black", font=("Trebuchet MS", 6, "bold"))
+
     if source == "default" and destination == "default":
         select_query = "SELECT * FROM FLIGHT"
     else:
         select_query = f"SELECT FLIGHT_NUM, SERIAL_NUM, ARRIVAL_TIME, DEPARTURE_TIME, SOURCE_LOCATION, DESTINATION_LOCATION, PRICE, AIRLINE FROM FLIGHT WHERE SOURCE_LOCATION='{source}' AND DESTINATION_LOCATION='{destination}'"
     
     DataBase_connection.cursor.execute(select_query)
-    rows = DataBase_connection.cursor.fetchall() 
-    # toz fikk
+    rows = DataBase_connection.cursor.fetchall()
+
     for row in rows:
         values = [str(value) for value in row]
         tree.insert("", tk.END, values=values)
 
     for col in tree["columns"]:
         tree.column(col, anchor=tk.CENTER)
-    tree.place(x=7, y=70)
+    tree.place(x=x_axis, y=y_axis)
+    # Configure tags to color rows
+    tree.tag_configure("oddrow", background="#e9f2f7")
+    tree.tag_configure("evenrow", background="#91b9cf")
+    tree.tag_configure("customfont", font=("Trebuchet MS",12, "normal"), foreground="black")
+
+    # Apply tags to alternate rows
+    for i in range(len(tree.get_children())):
+        if i % 2 == 0:
+            tree.item(tree.get_children()[i], tags=("customfont","evenrow"))
+        else:
+            tree.item(tree.get_children()[i], tags=("customfont","oddrow"))
+    
+    tree_height = len(tree.get_children())
+    tree["height"] = tree_height
+    if tree_height > 10:
+        tree["height"] = 10
 
 def update_flight():
-    admin_window.admin_page.destroy()
+    admin_window.administrator_page.destroy()
     global update_flight_page
+
     update_flight_page = tk.Tk()
-    x = int(home_window.screen_width/2 - 800/2)
-    y = int(home_window.screen_height/2 - 600/2)
-    update_flight_page.geometry(f"900x500+{x}+{y}")
-    List_flight(update_flight_page)
+    update_flight_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+    update_flight_page.resizable(False, False)
+
+    canvas= Canvas(update_flight_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
+    update_flight_page.title("Update Flight")
+
+    back_btn = tk.Button(update_flight_page, text="⬅", command= lambda: home_window.back(update_flight_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+
+    List_flight(update_flight_page, "default", "default", 30, 200)
     global flightNUM_id_entry, flightserial_id_entry,flightArrivalTime_entry,flightDEPARTURETime_entry,price_updated_entry
-    flightNUM_id_entry_label = tk.Label(update_flight_page, text="Enter the flight Number: ")
-    flightNUM_id_entry_label.place(x=10, y=10)
-    flightNUM_id_entry= tk.Entry(update_flight_page)
-    flightNUM_id_entry.place(x=170, y=10)
+    canvas.create_text(253, 500, text="Enter The Flight Number", font=("Trebuchet MS", 24), fill="black")
+    flightNUM_id_entry= tk.Entry(update_flight_page,font=("Trebuchet MS", 15))
+    flightNUM_id_entry.place(x=550, y=485, width=250,height=30)
 
-    flightArrivalTime_entry_label = tk.Label(update_flight_page, text="Enter the New Arrival Time: ")
-    flightArrivalTime_entry_label.place(x=10, y=40)
-    flightArrivalTime_entry= tk.Entry(update_flight_page)
-    flightArrivalTime_entry.place(x=170, y=40)
+    canvas.create_text(276, 550, text="Enter The New Arrival Time", font=("Trebuchet MS", 24), fill="black")
+    flightArrivalTime_entry= logo_gradiant.CustomEntry(update_flight_page, "YYYY-MM-DD HH:MM:SS", font=("Trebuchet MS", 15), fg="grey", justify=CENTER)
+    flightArrivalTime_entry.place(x=550, y=535, width=250,height=30)
 
-    flightDEPARTURETime_entry_label = tk.Label(update_flight_page, text="Enter the New DEPARTURE Time: ")
-    flightDEPARTURETime_entry_label.place(x=300, y=40)
-    flightDEPARTURETime_entry= tk.Entry(update_flight_page)
-    flightDEPARTURETime_entry.place(x=480, y=40)
+    canvas.create_text(300, 600, text="Enter The New Departure Time", font=("Trebuchet MS", 24), fill="black")
+    flightDEPARTURETime_entry= logo_gradiant.CustomEntry(update_flight_page, "YYYY-MM-DD HH:MM:SS", font=("Trebuchet MS", 15), fg="grey", justify=CENTER)
+    flightDEPARTURETime_entry.place(x=550, y=585, width=250,height=30)
 
-    price_updated_label = tk.Label(update_flight_page, text="Enter the New Price: ")
-    price_updated_label.place(x=300, y=10)
-    price_updated_entry= tk.Entry(update_flight_page)
-    price_updated_entry.place(x=480, y=10)
+    canvas.create_text(224, 650, text="Enter The New Price", font=("Trebuchet MS", 24), fill="black")
+    price_updated_entry= tk.Entry(update_flight_page,font=("Trebuchet MS", 15))
+    price_updated_entry.place(x=550, y=635, width=250,height=30)
 
-    submit_button = tk.Button(update_flight_page, text="Submit", width=10, height=2, command=update_flight_submit)
-    submit_button.place(x=400, y=400)
+    submit_button = tk.Button(update_flight_page, text="Update Flight", command=lambda:update_flight_submit(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button.place(x=643, y=710, height=50, width=250)
 
-def update_flight_submit():
-    update_query = f"UPDATE FLIGHT SET ARRIVAL_TIME = '{flightArrivalTime_entry.get()}', DEPARTURE_TIME = '{flightDEPARTURETime_entry.get()}', PRICE='{price_updated_entry.get()}' WHERE FLIGHT_NUM = '{flightNUM_id_entry.get()}'"
-    DataBase_connection.cursor.execute(update_query)
-    DataBase_connection.conn.commit()
-    done = Label(update_flight_page, text = "Flight updated successfully")
-    done.place(x=360, y=350)
-    List_flight(update_flight_page)
+def update_flight_submit(event):
+    if flightNUM_id_entry.get()=="" or flightArrivalTime_entry.get()=="" or flightDEPARTURETime_entry.get()=="" or price_updated_entry.get()=="":
+        error_message = event.create_text(home_window.screen_width / 2, 690, text="Please fill all the fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        update_query = f"UPDATE FLIGHT SET ARRIVAL_TIME = '{flightArrivalTime_entry.get()}', DEPARTURE_TIME = '{flightDEPARTURETime_entry.get()}', PRICE='{price_updated_entry.get()}' WHERE FLIGHT_NUM = '{flightNUM_id_entry.get()}'"
+        DataBase_connection.cursor.execute(update_query)
+        DataBase_connection.conn.commit()
+        success_message = event.create_text(home_window.screen_width / 2, 690, text="Flight Updated Successfully", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(success_message))
+        List_flight(update_flight_page, "default", "default", 30, 200)
+        flightNUM_id_entry.delete(0, END)
+        flightArrivalTime_entry.delete(0, END)
+        flightArrivalTime_entry.insert(0, "YYYY-MM-DD HH:MM:SS")
+        flightDEPARTURETime_entry.delete(0, END)
+        flightDEPARTURETime_entry.insert(0, "YYYY-MM-DD HH:MM:SS")
+        price_updated_entry.delete(0, END)
 
 def delete_flight():
-    admin_window.admin_page.destroy()
+    admin_window.administrator_page.destroy()
     global delete_flight_page
+
     delete_flight_page = tk.Tk()
-    x = int(home_window.screen_width/2 - 800/2)
-    y = int(home_window.screen_height/2 - 600/2)
-    delete_flight_page.geometry(f"900x500+{x}+{y}")
-    List_flight(delete_flight_page)
+    delete_flight_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+    delete_flight_page.resizable(False, False)
+
+    canvas= Canvas(delete_flight_page, width= home_window.screen_width, height= home_window.screen_height)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+
+    delete_flight_page.title("Delete Flight")
+
+    back_btn = tk.Button(delete_flight_page, text="⬅", command= lambda: home_window.back(delete_flight_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+
+    List_flight(delete_flight_page, "default", "default", 30, 200)
+
     global flight_deleted_id_entry
-    flight_deleted_id_label = tk.Label(delete_flight_page, text="Enter the Flight id: ")
-    flight_deleted_id_label.place(x=10, y=20)
-    flight_deleted_id_entry = tk.Entry(delete_flight_page)
-    flight_deleted_id_entry.place(x=150, y=20)
-    submit_button = tk.Button(delete_flight_page, text="Submit", width=10, height=2, command=delete_flight_submit)
-    submit_button.place(x=350, y=10)
+    canvas.create_text(200, 550, text="Enter The Flight ID", font=("Trebuchet MS", 24), fill="black")
+    
+    flight_deleted_id_entry = tk.Entry(delete_flight_page,font=("Trebuchet MS", 15))
+    flight_deleted_id_entry.place(x=350, y=535,width=250,height=30)
 
-def delete_flight_submit():
-    delete_query = f"DELETE FROM FLIGHT WHERE FLIGHT_NUM ='{flight_deleted_id_entry.get()}'"
-    DataBase_connection.cursor.execute(delete_query)
-    DataBase_connection.conn.commit()
+    submit_button = tk.Button(delete_flight_page, text="Delete Flight", command=lambda:delete_flight_submit(canvas), font=("Trebuchet MS", 12, "bold"), foreground="white", background="black")
+    submit_button.place(x=643, y=710, height=50, width=250)
 
-    if DataBase_connection.cursor.rowcount == 0:
-        done = Label(delete_flight_page, text="Flight not found")
+def delete_flight_submit(event):
+    if flight_deleted_id_entry.get()=="":
+        error_message = event.create_text(home_window.screen_width / 2, 670, text="Please enter the flight ID", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
     else:
-        done = Label(delete_flight_page, text="Flight deleted successfully")
-        
-    done.place(x=190, y=400)
-    List_flight(delete_flight_page)
+        delete_query = f"DELETE FROM FLIGHT WHERE FLIGHT_NUM ='{flight_deleted_id_entry.get()}'"
+        DataBase_connection.cursor.execute(delete_query)
+        DataBase_connection.conn.commit()
+        if DataBase_connection.cursor.rowcount == 0:
+            error_message = event.create_text(home_window.screen_width / 2, 670, text="Flight ID not found", fill="black", font =("Trebuchet MS", 24))
+            event.after(5000, lambda: event.delete(error_message))
+        else:
+            success_message = event.create_text(home_window.screen_width / 2, 670, text="Flight Deleted Successfully", fill="black", font =("Trebuchet MS", 24))
+            event.after(5000, lambda: event.delete(success_message))
+            List_flight(delete_flight_page, "default", "default", 30, 200)
+            flight_deleted_id_entry.delete(0, END)
 
 def add_pilot():
-    admin_window.admin_page.destroy()
-    global Pname_entry, DOB_entry
+    admin_window.administrator_page.destroy()
+    global Pname_entry, DOB_entry,add_pilot_page
+
     add_pilot_page = tk.Tk()
-    add_pilot_page.geometry(f"500x500+{home_window.x}+{home_window.y}")
-    add_pilot_page.title("Sign Up")
-    #input first name
-    Pname_label = tk.Label(add_pilot_page, text="Pilot Name")
-    Pname_label.place(x=10, y=10)
-    Pname_entry = tk.Entry(add_pilot_page)
-    Pname_entry.place(x=100, y=10)
-    #input date of birth
-    DOB_label = tk.Label(add_pilot_page, text="Date of Birth")
-    DOB_label.place(x=10, y=40)
+    add_pilot_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+
+    canvas= Canvas(add_pilot_page, width= home_window.screen_width, height= home_window.screen_height)
+    add_pilot_page.resizable(False, False)
+    logo_gradiant.background(canvas)
+    canvas.pack()
+    
+    back_btn = tk.Button(add_pilot_page, text="⬅", command= lambda: home_window.back(add_pilot_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+    
+    add_pilot_page.title("Add Pilot")
+
+    canvas.create_text(home_window.screen_width  / 2, 170, text="Add a Captain", fill="black", font =("Trebuchet MS", 44, "bold"))
+    canvas.create_text(home_window.screen_width / 2 - 165 , 340, text="Pilot Name", fill="black", font =("Trebuchet MS", 24))
+    Pname_entry = tk.Entry(add_pilot_page, font=("Trebuchet MS", 15))
+    Pname_entry.place(x=750, y=325,width=250,height=30)
+
+    canvas.create_text(home_window.screen_width / 2 - 150, 470, text="Date of Birth", fill="black", font =("Trebuchet MS", 24))
     global DOB_entry
-    DOB_entry= tk.Entry(add_pilot_page, highlightthickness=0, relief='flat')
-    DOB_entry.place(x=100, y=40)
+    DOB_entry = tk.Entry(add_pilot_page, font=("Trebuchet MS", 15))
+    DOB_entry.place(x=750, y=455,width=250,height=30)
     DOB_entry.insert(0, 'YYYY-MM-DD')
     DOB_entry.bind("<Button-1>", signup_window.pick_date)
-    #submit button
-    submit_button = tk.Button(add_pilot_page, text="Submit", width=10, height=2, command=submit_pilot)
-    submit_button.place(x=200, y=400)
 
-def submit_pilot():
-    dob = datetime.datetime.strptime(DOB_entry.get(), "%Y-%m-%d")
-    age = signup_window.calculate_age(dob)
-    insert_query = f"INSERT INTO PILOT (PNAME, DOB, AGE) VALUES ('{Pname_entry.get()}', '{DOB_entry.get()}', '{age}')"
-    DataBase_connection.cursor.execute(insert_query)
-    DataBase_connection.conn.commit()
+    submit_button = tk.Button(add_pilot_page, text="ADD PILOT", command=lambda:submit_pilot(canvas), font=("Trebuchet MS", 12, "bold") , foreground="white", background="black")
+    submit_button.place(x=643, y=710, height=50, width=250)
 
-def List_pilot(page):
+def submit_pilot(event):
+    if Pname_entry.get()=="" or DOB_entry.get()=="":
+        error_message = event.create_text(home_window.screen_width / 2, 670, text="Please fill all the fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        dob = datetime.datetime.strptime(DOB_entry.get(), "%Y-%m-%d")
+        age = signup_window.calculate_age(dob)
+        insert_query = f"INSERT INTO PILOT (PNAME, DOB, AGE) VALUES ('{Pname_entry.get()}', '{DOB_entry.get()}', '{age}')"
+        DataBase_connection.cursor.execute(insert_query)
+        DataBase_connection.conn.commit()
+        success_message = event.create_text(home_window.screen_width / 2, 670, text="Pilot Added Successfully", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(success_message))
+        Pname_entry.delete(0, END)
+        DOB_entry.delete(0, END)
+        DOB_entry.insert(0, 'YYYY-MM-DD')
+
+def List_pilot(page, x_axis = 0, y_axis = 0):
+    for widget in page.winfo_children():
+        if isinstance(widget, ttk.Treeview) and page != assign_pilotToAircraft_page:
+            widget.destroy()  
     tree = ttk.Treeview(page)
-    tree["columns"] = ("SSN", "PNAME", "DOB", "AGE")
+    style =ttk.Style()
+    tree["columns"] = ("SSN", "PNAME", "AGE", "DOB")
 
     tree.column("#0", width=0, stretch=tk.NO)
-    tree.column("SSN", anchor=tk.CENTER, width=100)
-    tree.column("PNAME", anchor=tk.CENTER, width=100)
-    tree.column("DOB", anchor=tk.CENTER, width=100)
-    tree.column("AGE", anchor=tk.CENTER, width=100)
+    tree.column("SSN", anchor=tk.CENTER, width=165)
+    tree.column("PNAME", anchor=tk.CENTER, width=165)
+    tree.column("AGE", anchor=tk.CENTER, width=165)
+    tree.column("DOB", anchor=tk.CENTER, width=165)
 
     tree.heading("#0", text="", anchor=tk.CENTER)
     tree.heading("SSN", text="SSN", anchor=tk.CENTER)
     tree.heading("PNAME", text="PNAME", anchor=tk.CENTER)
-    tree.heading("DOB", text="DOB", anchor=tk.CENTER)
     tree.heading("AGE", text="AGE", anchor=tk.CENTER)
-
+    tree.heading("DOB", text="DOB", anchor=tk.CENTER)
+    style.configure("Treeview.Heading", foreground="black", font=("Trebuchet MS", 16, "bold"))
+    style.configure("Treeview.Column", foreground="black", font=("Trebuchet MS", 6, "bold"))
+    
     select_query = "SELECT * FROM PILOT"
     DataBase_connection.cursor.execute(select_query)
     rows = DataBase_connection.cursor.fetchall()
@@ -344,30 +504,76 @@ def List_pilot(page):
 
     for col in tree["columns"]:
         tree.column(col, anchor=tk.CENTER)
-    tree.place(x=500)
+    tree.place(x=x_axis, y=y_axis)
+    # Configure tags to color rows
+    tree.tag_configure("oddrow", background="#e9f2f7")
+    tree.tag_configure("evenrow", background="#91b9cf")
+    tree.tag_configure("customfont", font=("Trebuchet MS",12, "normal"))
+
+    # Apply tags to alternate rows
+    for i in range(len(tree.get_children())):
+        if i % 2 == 0:
+            tree.item(tree.get_children()[i], tags=("customfont","evenrow"))
+        else:
+            tree.item(tree.get_children()[i], tags=("customfont","oddrow"))
+    
+    tree_height = len(tree.get_children())
+    tree["height"] = tree_height
+    if tree_height > 10:
+        tree["height"] = 10
 
 def assign_pilotToAircraft():
-    admin_window.admin_page.destroy()
-    global assign_pilotToAircraft_page
-    assign_pilotToAircraft_page = tk.Tk()
-    x = int(home_window.screen_width/2 - 800/2)
-    y = int(home_window.screen_height/2 - 600/2)
-    assign_pilotToAircraft_page.geometry(f"900x500+{x}+{y}")
-    List_pilot(assign_pilotToAircraft_page)
-    List_aircraft(assign_pilotToAircraft_page)
-    global pilot_id_entry, aircraft_id_entry
-    pilot_id_label = tk.Label(assign_pilotToAircraft_page, text="Enter the Pilot id: ")
-    pilot_id_label.place(x=10, y=230)
-    pilot_id_entry = tk.Entry(assign_pilotToAircraft_page)
-    pilot_id_entry.place(x=150, y=230)
-    aircraft_id_label = tk.Label(assign_pilotToAircraft_page, text="Enter the Aircraft id: ")
-    aircraft_id_label.place(x=10, y=260)
-    aircraft_id_entry = tk.Entry(assign_pilotToAircraft_page)
-    aircraft_id_entry.place(x=150, y=260)
-    submit_button = tk.Button(assign_pilotToAircraft_page, text="Submit", width=10, height=2, command=assign_pilotToAircraft_submit)
-    submit_button.place(x=350, y=350)
+    admin_window.administrator_page.destroy()
+    global assign_pilotToAircraft_page, pilot_id_entry, aircraft_id_entry
 
-def assign_pilotToAircraft_submit():
-    insert_query = f"INSERT INTO FLYING (SSN, SERIAL_NUM) VALUES ('{pilot_id_entry.get()}', '{aircraft_id_entry.get()}')"
-    DataBase_connection.cursor.execute(insert_query)
-    DataBase_connection.conn.commit()
+    assign_pilotToAircraft_page = tk.Tk()
+    assign_pilotToAircraft_page.geometry(f"{home_window.screen_width}x{home_window.screen_height}")
+
+    canvas= Canvas(assign_pilotToAircraft_page, width= home_window.screen_width, height= home_window.screen_height)
+    assign_pilotToAircraft_page.resizable(False, False)
+
+    logo_gradiant.background(canvas)
+    canvas.pack()
+    assign_pilotToAircraft_page.title("Assign Pilot")
+
+    back_btn = tk.Button(assign_pilotToAircraft_page, text="⬅", command= lambda: home_window.back(assign_pilotToAircraft_page, admin_window.admin_page), font=(50), bd=0, bg="white", fg="black")
+    back_btn.place(x=15, y=15, anchor=CENTER, height=30, width=30)
+
+    canvas.create_text(1100, 230, text="AIRCRAFT TABLE", fill="black", font =("Trebuchet MS", 26, "bold"))
+    List_aircraft(assign_pilotToAircraft_page, home_window.screen_width / 2 - 40, 270)
+    canvas.create_text(350, 230, text="PILOT TABLE", fill="black", font =("Trebuchet MS", 26, "bold"))
+    List_pilot(assign_pilotToAircraft_page, 20, 270)
+
+    canvas.create_text(177, 560, text="Enter The Pilot SSN", fill="black", font =("Trebuchet MS", 24))
+    pilot_id_entry = tk.Entry(assign_pilotToAircraft_page,font=("Trebuchet MS", 15))
+    pilot_id_entry.place(x=350, y=545,width=250,height=30)
+
+    canvas.create_text(190, 640, text="Enter The Aircraft ID", fill="black", font =("Trebuchet MS", 24))
+    aircraft_id_entry = tk.Entry(assign_pilotToAircraft_page,font=("Trebuchet MS", 15))
+    aircraft_id_entry.place(x=350, y=625,width=250,height=30)
+
+    submit_button = tk.Button(assign_pilotToAircraft_page, text="ASSIGN PILOT", command=lambda:assign_pilotToAircraft_submit(canvas), font=("Trebuchet MS", 12, "bold") , foreground="white", background="black")
+    submit_button.place(x=643, y=710, width=200, height=50)
+
+def assign_pilotToAircraft_submit(event):
+    if pilot_id_entry.get() == "" or aircraft_id_entry.get() == "":
+        error_message = event.create_text(home_window.screen_width / 2, 685, text="Please Fill All The Fields", fill="black", font =("Trebuchet MS", 24))
+        event.after(5000, lambda: event.delete(error_message))
+    else:
+        select_query = f"SELECT * FROM FLYING WHERE SSN = '{pilot_id_entry.get()}' AND SERIAL_NUM = '{aircraft_id_entry.get()}'"
+        DataBase_connection.cursor.execute(select_query)
+        rows = DataBase_connection.cursor.fetchall()
+        print(rows)
+        if len(rows) != 0:
+            error_message = event.create_text(home_window.screen_width / 2, 685, text="Pilot Already Assigned To This Aircraft", fill="black", font =("Trebuchet MS", 24))
+            event.after(5000, lambda: event.delete(error_message))
+        else:
+            insert_query = f"INSERT INTO FLYING (SSN, SERIAL_NUM) VALUES ('{pilot_id_entry.get()}', '{aircraft_id_entry.get()}')"
+            DataBase_connection.cursor.execute(insert_query)
+            DataBase_connection.conn.commit()
+            success_message = event.create_text(home_window.screen_width / 2, 685, text="Pilot Assigned Successfully", fill="black", font =("Trebuchet MS", 24))
+            event.after(5000, lambda: event.delete(success_message))
+            List_aircraft(assign_pilotToAircraft_page, home_window.screen_width / 2 - 40, 270)
+            List_pilot(assign_pilotToAircraft_page, 20, 270)
+            pilot_id_entry.delete(0, END)
+            aircraft_id_entry.delete(0, END)

@@ -333,6 +333,10 @@ alter table PASSENGER
       references FLIGHT (FLIGHT_NUM) ON DELETE CASCADE
 go
 
+alter table PERSON
+   add constraint UNIQUE_EMAIL UNIQUE(EMAIL)
+go
+
 alter table TICKET
    add constraint FK_TICKET_BOOK_PERSON foreign key (ID)
       references PERSON (ID) ON DELETE CASCADE
@@ -342,7 +346,6 @@ alter table TICKET
    add constraint FK_TICKET_HAS_FLIGHT foreign key (FLIGHT_NUM)
       references FLIGHT (FLIGHT_NUM) ON DELETE CASCADE
 go
-
 
 
 DBCC CHECKIDENT ('table_name', RESEED, 0);
